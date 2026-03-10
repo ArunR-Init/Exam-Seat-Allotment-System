@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - Exam Hall Allotment System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight">Faculty Dashboard</h1>
+        <p class="text-muted-foreground mt-1">Welcome back, {{ user.name }}. Manage your assigned examination hall.</p>
+    </div>
+
+    {% if not show_details %}
+    <!-- Hidden State - Reveal Button -->
+    <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-primary">
+        <div class="p-8 flex flex-col items-center justify-center text-center space-y-6">
+            <div class="p-4 bg-primary/10 rounded-full">
+                <i data-lucide="eye" class="w-12 h-12 text-primary"></i>
+            </div>
+            <div class="space-y-2 max-w-md">
+                <h2 class="text-2xl font-bold">View Allotted Room</h2>
+                <p class="text-muted-foreground">Click the button below to securely view your room assignment and the roster of students you are invigilating.</p>
+            </div>
+            <form method="get" action="{% url 'teacher_dashboard' %}">
+                <input type="hidden" name="reveal" value="true">
+                <button type="submit" class="inline-flex items-center justify-center rounded-md font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 text-lg shadow-lg hover:shadow-xl">
+                    <i data-lucide="door-open" class="w-5 h-5 mr-3"></i>
+                    Reveal Assignment
+                </button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <!-- Revealed State - Room and Students -->
+    {% if room %}
+    <div class="space-y-6 animate-fade-in">
+        <!-- Room Details Card -->
+        <div class="rounded-lg border bg-primary/5 border-primary/20 shadow-sm">
+            <div class="p-6 flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 bg-white rounded-lg shadow-sm border">
+                        <i data-lucide="door-open" class="w-8 h-8 text-primary"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Assigned Room</p>
+                        <h3 class="text-3xl font-bold text-primary">{{ room.name }}</h3>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Students</p>
+                    <p class="text-2xl font-bold">{{ students|length }}/15</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Roster Card -->
+        <div class="rounded-lg border bg-card text-card-foreground shadow-md">
+            <div class="p-6 space-y-1.5">
+                <h3 class="text-2xl font-semibold leading-none tracking-tight flex items-center">
+                    <i data-lucide="users" class="w-5 h-5 mr-2"></i>
+                    Student Roster
+                </h3>
+                <p class="text-sm text-muted-foreground">Students assigned to {{ room.name }}. You can only view students in your hall.</p>
+            </div>
+            <div class="p-6 pt-0">
+                <div class="rounded-md border overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-slate-50">
+                            <tr class="border-b transition-colors hover:bg-muted/50">
+                                <th class="h-12 px-4 text-center align-middle font-bold text-muted-foreground w-[100px]">Seat No.</th>
+                                <th class="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Roll Number</th>
+                                <th class="h-12 px-4 text-left align-middle font-bold text-muted-foreground">Student Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if students %}
+                                {% for item in students %}
+                                <tr class="border-b transition-colors hover:bg-muted/50">
+                                    <td class="p-4 text-center font-bold text-lg bg-slate-50/50 border-r">{{ item.seatNumber }}</td>
+                                    <td class="p-4 font-mono">{{ item.student.username }}</td>
+                                    <td class="p-4 font-medium">{{ item.student.name }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="p-8 text-center text-muted-foreground">
+                                        No students allotted to this room yet.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center">
+            <button onclick="window.print()" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-6 py-2">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i>
+                Print Student Roster
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Room Assigned -->
+    <div class="rounded-lg border bg-card text-card-foreground shadow-md">
+        <div class="p-12 flex flex-col items-center justify-center text-center space-y-4">
+            <div class="p-4 bg-yellow-50 rounded-full">
+                <i data-lucide="alert-circle" class="w-12 h-12 text-yellow-600"></i>
+            </div>
+            <div class="space-y-2 max-w-md">
+                <h2 class="text-2xl font-bold">No Room Assigned</h2>
+                <p class="text-muted-foreground">You have not been assigned to an examination hall yet. Please contact the administration for details.</p>
+            </div>
+            <a href="{% url 'home' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mt-4">
+                <i data-lucide="home" class="w-4 h-4 mr-2"></i>
+                Go to Home
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+</script>
+
+<style>
+    @media print {
+        nav, footer, button {
+            display: none !important;
+        }
+        
+        .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

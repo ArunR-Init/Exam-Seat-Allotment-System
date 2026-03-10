@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - Exam Hall Allotment System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in">
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+        <p class="text-muted-foreground mt-1">Welcome back, {{ user.name }}. View your examination hall assignment.</p>
+    </div>
+
+    {% if not show_details %}
+    <!-- Hidden State - Reveal Button -->
+    <div class="rounded-lg border bg-card text-card-foreground shadow-md border-t-4 border-t-primary">
+        <div class="p-8 flex flex-col items-center justify-center text-center space-y-6">
+            <div class="p-4 bg-primary/10 rounded-full">
+                <i data-lucide="eye" class="w-12 h-12 text-primary"></i>
+            </div>
+            <div class="space-y-2 max-w-md">
+                <h2 class="text-2xl font-bold">View Exam Allotment</h2>
+                <p class="text-muted-foreground">Click the button below to reveal your assigned examination hall and seat number.</p>
+            </div>
+            <form method="get" action="{% url 'student_dashboard' %}">
+                <input type="hidden" name="reveal" value="true">
+                <button type="submit" class="inline-flex items-center justify-center rounded-md font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 text-lg shadow-lg hover:shadow-xl">
+                    <i data-lucide="door-open" class="w-5 h-5 mr-3"></i>
+                    Reveal My Allotment
+                </button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <!-- Revealed State - Allotment Details -->
+    {% if allotment %}
+    <div class="space-y-6 animate-fade-in">
+        <!-- Admit Card -->
+        <div class="rounded-lg border bg-card text-card-foreground shadow-xl border-t-4 border-t-primary overflow-hidden">
+            <div class="bg-primary text-primary-foreground p-4 text-center">
+                <h2 class="text-2xl font-bold">Examination Admit Card</h2>
+                <p class="text-sm opacity-90 mt-1">Academic Year 2026</p>
+            </div>
+            
+            <div class="p-8 space-y-6">
+                <!-- Student Details -->
+                <div class="grid md:grid-cols-2 gap-6 pb-6 border-b">
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Student Name</p>
+                        <p class="text-xl font-bold">{{ user.name }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Roll Number</p>
+                        <p class="text-xl font-bold font-mono">{{ user.username }}</p>
+                    </div>
+                </div>
+
+                <!-- Room and Seat Details -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-primary/10 rounded-lg">
+                                <i data-lucide="door-open" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Examination Hall</p>
+                                <p class="text-3xl font-bold text-primary">{{ allotment.room.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-primary/10 rounded-lg">
+                                <i data-lucide="hash" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Seat Number</p>
+                                <p class="text-3xl font-bold text-primary">{{ allotment.seat_number }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invigilator Details -->
+                <div class="bg-muted/30 rounded-lg p-4 mt-6">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="user-check" class="w-5 h-5 text-muted-foreground"></i>
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Invigilator</p>
+                            <p class="font-semibold">{{ allotment.room.teacher.name }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                    <div class="flex space-x-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                        <div class="space-y-2">
+                            <p class="font-semibold text-blue-900">Important Instructions:</p>
+                            <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                                <li>Please arrive at the examination hall 15 minutes before the scheduled time</li>
+                                <li>Carry a valid ID card and this admit card (screenshot/print)</li>
+                                <li>Proceed directly to your assigned seat number</li>
+                                <li>Mobile phones and electronic devices are strictly prohibited</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-muted/50 p-4 text-center border-t">
+                <p class="text-sm text-muted-foreground">
+                    <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                    Generated on {{ today }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center">
+            <button onclick="window.print()" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-6 py-2">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i>
+                Print Admit Card
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Allotment Yet -->
+    <div class="rounded-lg border bg-card text-card-foreground shadow-md">
+        <div class="p-12 flex flex-col items-center justify-center text-center space-y-4">
+            <div class="p-4 bg-yellow-50 rounded-full">
+                <i data-lucide="alert-circle" class="w-12 h-12 text-yellow-600"></i>
+            </div>
+            <div class="space-y-2 max-w-md">
+                <h2 class="text-2xl font-bold">No Allotment Yet</h2>
+                <p class="text-muted-foreground">Your examination seat has not been allotted yet. Please check back later or contact the administration.</p>
+            </div>
+            <a href="{% url 'home' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 mt-4">
+                <i data-lucide="home" class="w-4 h-4 mr-2"></i>
+                Go to Home
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+</script>
+
+<style>
+    @media print {
+        nav, footer, button {
+            display: none !important;
+        }
+        
+        .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}
